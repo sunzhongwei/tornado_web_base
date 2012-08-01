@@ -24,6 +24,7 @@ from tornado.options import define, options
 
 import home
 import setting
+import error
 
 
 define("port", default=5000, help="run on the given port", type=int)
@@ -43,6 +44,12 @@ class Application(tornado.web.Application):
     def __init__(self):
         handlers = [
             (r"/", home.HomeHandler),
+            # 404
+            # http://groups.google.com/group/python-tornado/browse_thread
+            # /thread/ba923986b7a3773e/dc40faccf12e5a98
+            # http://groups.google.com/group/python-tornado/browse_thread
+            # /thread/0284b5d957f92b5d/f654b2ae192b2a4e
+            (r".*", error.NotFoundHandler),
         ]
         settings = dict(
             template_path=os.path.join(os.path.dirname(__file__), "template"),
