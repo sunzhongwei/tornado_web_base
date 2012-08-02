@@ -121,7 +121,11 @@ if '__main__' == __name__:
     print '''Manually add these lines to main.py:
     import %s
     (r"/%s", %s.%sHandler),
+
+Add below line to base.html:
+    <li><a href="/%s">%s</a></li>
     ''' % (handler_name, handler_name, handler_name,
-            handler_name.title().replace("_", ""), )
+            handler_name.title().replace("_", ""),
+            handler_name, handler_name)
 
 
