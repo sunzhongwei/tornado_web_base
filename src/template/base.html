@@ -14,9 +14,9 @@
     </script>
     <![endif]-->
     <title>{% block title %}base-page{% end %}</title>
-    <link rel="stylesheet" type="text/css" href="{{ static_url("css/style.css") }}">
-    <link rel="stylesheet" type="text/css" href="{{ static_url("css/bootstrap.min.css") }}">
-    <link rel="stylesheet" type="text/css" href="{{ static_url("css/bootstrap-responsive.min.css") }}">
+    <link rel="stylesheet" type="text/css" href="{{ static_url('css/style.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ static_url('css/bootstrap.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ static_url('css/bootstrap-responsive.min.css') }}">
   </head>
 
   <body>
@@ -24,9 +24,9 @@
       <div class="navbar-inner">
         <div class="container">
           <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
+            {% for i in xrange(3) %}
+              <span class="icon-bar"></span>
+            {% end %}
           </a>
           <a class="brand" href="/">Home Page</a>
           <div class="nav-collapse">
@@ -42,16 +42,12 @@
       {% block body %}{% end %}
     </div>
 
-    <section id="sidebar">
-    {% block sidebar %}{% end %}
-    </section>
-
     <footer id="page_footer">
     <p>&copy; 2012 Zhongwei</p>
     </footer>
     <!-- javascript ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="/static/js/jquery.js"></script>
-    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="{{ static_url('js/jquery.js') }}"></script>
+    <script src="{{ static_url('js/bootstrap.min.js') }}"></script>
   </body>
 </html>
