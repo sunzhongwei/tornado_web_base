@@ -27,14 +27,14 @@ import setting
 import error
 
 
-define("port", default=5000, help="run on the given port", type=int)
+define("port", default=8888, help="run on the given port", type=int)
 
 
 def set_options():
     tornado.options.parse_command_line()    # get port number
     setting.process_port = options.port
     options.log_file_prefix = os.path.join(setting.log_dir, "%s_%s.log" \
-            % ( setting.app_name, tornado.options.options.port, ))
+            % (setting.app_name, tornado.options.options.port, ))
     options.log_file_max_size = setting.log_file_max_size
     options.log_file_num_backups = setting.log_file_num_backups
     tornado.options.parse_command_line()    # make log settings take effect
