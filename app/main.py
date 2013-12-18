@@ -14,6 +14,7 @@
 # ----------------------------------------
 
 # build-in, 3rd party and my modules
+import time
 import os.path
 import logging
 
@@ -24,7 +25,6 @@ from tornado.options import define, options
 
 import home
 import setting
-import error
 
 
 define("port", default=5000, help="run on the given port", type=int)
@@ -40,6 +40,30 @@ def set_options():
     tornado.options.parse_command_line()    # make log settings take effect
 
 
+class BaseHandler(tornado.web.RequestHandler):
+    def prepare(self):
+        self._start_time = time.time()
+        arguments = self.request.arguments
+        logging.info("uri: %s, method: %s, user: %s, arguments: %s, ip: %s" % (
+                self.request.uri, self.request.method,
+                self._handler_info.get("email", "not login"),
+                arguments, self.request.remote_ip))
+
+    def on_finish(self):
+        cost_time = time.time() - self._start_time
+        logging.info("cost time: %0.3f" % (cost_time, ))
+
+    def _handle_request_exception(self, e):
+        # TODO
+        self.send_error(500)
+
+
+class NotFoundHandler(BaseHandler):
+    def get(self):
+        self.set_status(404)
+        self.render("404.html")
+
+
 class Application(tornado.web.Application):
     def __init__(self):
         handlers = [
@@ -49,7 +73,7 @@ class Application(tornado.web.Application):
             # /thread/ba923986b7a3773e/dc40faccf12e5a98
             # http://groups.google.com/group/python-tornado/browse_thread
             # /thread/0284b5d957f92b5d/f654b2ae192b2a4e
-            (r".*", error.NotFoundHandler),
+            (r".*", NotFoundHandler),
         ]
         settings = dict(
             template_path=os.path.join(os.path.dirname(__file__), "template"),
