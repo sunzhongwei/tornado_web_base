@@ -5,12 +5,6 @@
 # HOW TO START
 # ============
 # $ python main.py [--port=<port_num>]
-#
-# local debug to avoid generating .pyc files
-# $ python -B main.py [--port=<port_num>]
-#
-# http://stackoverflow.com/questions/154443/how-to-avoid-pyc-files
-# http://stackoverflow.com/questions/9408366/stop-python-from-generating-pyc-files
 # ----------------------------------------
 
 # build-in, 3rd party and my modules
@@ -23,11 +17,10 @@ import tornado.web
 import tornado.options
 from tornado.options import define, options
 
-import home
 import setting
 
 
-define("port", default=5000, help="run on the given port", type=int)
+define("port", default=8888, help="run on the given port", type=int)
 
 
 def set_options():
@@ -64,10 +57,15 @@ class NotFoundHandler(BaseHandler):
         self.render("404.html")
 
 
+class HomeHandler(BaseHandler):
+    def get(self):
+        self.render("home.html")
+
+
 class Application(tornado.web.Application):
     def __init__(self):
         handlers = [
-            (r"/", home.HomeHandler),
+            (r"/", HomeHandler),
             # 404
             # http://groups.google.com/group/python-tornado/browse_thread
             # /thread/ba923986b7a3773e/dc40faccf12e5a98
@@ -89,5 +87,4 @@ if __name__ == "__main__":
     app = Application()
     app.listen(options.port)
     tornado.ioloop.IOLoop.instance().start()
-
 
