@@ -35,7 +35,6 @@ process_port = None     # set this value in main.py
 log_dir = "/data/logs/%s" % app_name
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
-log_file_max_size = 1 * M
+log_file_max_size = 100 * M
 log_file_num_backups = 10
-
 
