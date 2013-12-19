@@ -88,9 +88,12 @@ class BaseHandler(tornado.web.RequestHandler):
     def prepare(self):
         self._start_time = time.time()
         arguments = self.request.arguments
+        if self.current_user is None:
+            user = "anonymous"
+        else:
+            user = self.current_user["email"]
         logging.info("uri: %s, method: %s, user: %s, arguments: %s, ip: %s" % (
-                self.request.uri, self.request.method,
-                self.current_user["email"],
+                self.request.uri, self.request.method, user,
                 arguments, self.request.remote_ip))
 
     def on_finish(self):
