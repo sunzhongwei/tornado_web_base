@@ -8,7 +8,7 @@ import os.path
 # ----------------------------------------
 # To modify
 # ----------------------------------------
-app_name = "tornado_web_base"
+app_name = "app"
 debug = True
 
 

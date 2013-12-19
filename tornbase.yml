@@ -1,0 +1,10 @@
+# ~/.tmuxinator/tornbase.yml
+# you can make as many tabs as you wish...
+
+project_name: Tornado Web Base 
+project_root: ~/work/tornado_web_base/
+tabs:
+  - editor: ls
+  - shell: ls 
+  - server: ls 
+  - vimwiki: cd ~/vimwiki/

@@ -9,12 +9,17 @@
 
 # build-in, 3rd party and my modules
 import time
+import json
+import datetime
 import os.path
 import logging
 
 import tornado.ioloop
 import tornado.web
 import tornado.options
+import tornado.escape
+from tornado import gen
+from tornado.httpclient import AsyncHTTPClient, HTTPRequest
 from tornado.options import define, options
 
 import setting
@@ -33,13 +38,50 @@ def set_options():
     tornado.options.parse_command_line()    # make log settings take effect
 
 
+class Application(tornado.web.Application):
+    def __init__(self):
+        handlers = [
+            (r"/", HomeHandler),
+            (r".*", NotFoundHandler),
+        ]
+        settings = dict(
+            login_url="/login",
+            template_path=os.path.join(os.path.dirname(__file__), "template"),
+            static_path=os.path.join(os.path.dirname(__file__), "static"),
+            xsrf_cookies=True,
+            # uuid.uuid4().hex
+            cookie_secret="f17039a3feab43da96f825fb3f7f2a47",
+            debug=setting.debug,
+        )
+        tornado.web.Application.__init__(self, handlers, **settings)
+
+        # Have one global connection to the blog DB across all handlers
+        #self.db = torndb.Connection(
+        #    host=options.mysql_host, database=options.mysql_database,
+        #    user=options.mysql_user, password=options.mysql_password)
+        self.db = None
+
+
+
 class BaseHandler(tornado.web.RequestHandler):
+    @property
+    def db(self):
+        return self.application.db
+
+    def get_current_user(self):
+        '''use self.current_user to fetch user info
+        '''
+        user_info = self.get_secure_cookie("dmonitoring_user")
+        if not user_info:
+            return None
+        return tornado.escape.json_decode(user_info)
+
     def prepare(self):
         self._start_time = time.time()
         arguments = self.request.arguments
-        logging.info("uri: %s, method: %s, user: %s, arguments: %s, ip: %s" % (
+        # TODO: user info
+        logging.info("uri: %s, method: %s, user: , arguments: %s, ip: %s" % (
                 self.request.uri, self.request.method,
-                self._handler_info.get("email", "not login"),
                 arguments, self.request.remote_ip))
 
     def on_finish(self):
@@ -62,23 +104,75 @@ class HomeHandler(BaseHandler):
         self.render("home.html")
 
 
-class Application(tornado.web.Application):
-    def __init__(self):
-        handlers = [
-            (r"/", HomeHandler),
-            # 404
-            # http://groups.google.com/group/python-tornado/browse_thread
-            # /thread/ba923986b7a3773e/dc40faccf12e5a98
-            # http://groups.google.com/group/python-tornado/browse_thread
-            # /thread/0284b5d957f92b5d/f654b2ae192b2a4e
-            (r".*", NotFoundHandler),
-        ]
-        settings = dict(
-            template_path=os.path.join(os.path.dirname(__file__), "template"),
-            static_path=os.path.join(os.path.dirname(__file__), "static"),
-            debug=setting.debug,
-        )
-        tornado.web.Application.__init__(self, handlers, **settings)
+class LoginHandler(BaseHandler):
+    def get(self):
+        self.render("login.html", err_msg = None)
+
+    @tornado.web.asynchronous
+    @gen.coroutine
+    def post(self):
+        email = self.get_argument("email")
+        password = self.get_argument("password")
+        d_token = self.get_argument("d_token")
+
+        rsp = yield self._call_user_token_api(email, password, d_token)
+        if rsp.code != 200:
+            # TODO: let user retry
+            raise Exception("Fail to get login api response, http code: " % (
+                    rsp.code, ))
+
+        ret = json.loads(rsp.body)
+
+        if ret["status"]["code"] == "1":
+            login_token = ret["user"]["login_token"]
+            login_id = ret["user"]["login_id"]
+            user = {"login_token": login_token}
+            # save login_id, login_token to database
+            record_scan.sfxxx_users.update({"login_token": login_token},
+                    {"$set": {"email": email, "login_id": login_id,
+                              "created_on": datetime.datetime.now()}},
+                    upsert=True)
+            self.set_secure_cookie("sfxxx_user",
+                                   tornado.escape.json_encode(user))
+            self.redirect("/")
+            return
+        else:
+            self.render("login.html", err_msg = ret["status"]["message"])
+
+    def _call_user_token_api(self, email, password, d_token):
+        '''Format of response body:
+
+        {
+            "status": {
+                "code": "1",
+                "created_at": "2013-10-25 10:45:35",
+                "message": "Action completed successful"
+            },
+            "user": {
+                "login_id": "729450",
+                "login_token": "bffc5a193ec31da6f4addef35ae7bf54"
+            }
+        }
+        '''
+        post_data = {
+                "login_email": email,
+                "login_password": password,
+                "login_code": d_token,
+                "login_remember": "yes",
+                "lang": "cn",
+                "format": "json",
+        }
+        post_data = urllib.urlencode(post_data)
+        req = HTTPRequest(LOGIN_API_URL, method="POST",
+                headers=setting.HEADERS, body=post_data)
+        http_client = AsyncHTTPClient()
+        return http_client.fetch(req)
+
+
+class LogoutHandler(BaseHandler):
+    def get(self):
+        self.clear_cookie("dmonitoring_user")
+        self.redirect(self.get_argument("next"), "/")
 
 
 if __name__ == "__main__":
