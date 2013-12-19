@@ -23,13 +23,6 @@ cur_dir_path = os.path.dirname(cur_file_path)
 
 
 # ----------------------------------------
-# Production Information
-# ----------------------------------------
-version_id = cur_dir_path.split("/")[-1]
-process_port = None     # set this value in main.py
-
-
-# ----------------------------------------
 # log
 # ----------------------------------------
 log_dir = "/data/logs/%s" % app_name

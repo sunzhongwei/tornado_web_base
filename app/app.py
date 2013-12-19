@@ -39,17 +39,11 @@ def set_options():
 
 class Application(tornado.web.Application):
     def __init__(self):
-        handlers = [
-            (r"/", HomeHandler),
-            (r"/compose", ComposeHandler),
-            (r"/auth/login", AuthLoginHandler),
-            (r"/auth/logout", AuthLogoutHandler),
-            (r".*", NotFoundHandler),
-        ]
         settings = dict(
             login_url="/auth/login",
             template_path=os.path.join(os.path.dirname(__file__), "template"),
-            static_path=os.path.join(os.path.dirname(__file__), "static"),
+            static_path=os.path.join(os.path.dirname(__file__),
+                "static/" + setting.app_name),
             xsrf_cookies=True,
             # uuid.uuid4().hex
             cookie_secret="f17039a3feab43da96f825fb3f7f2a47",
@@ -57,6 +51,18 @@ class Application(tornado.web.Application):
             google_consumer_secret="anonymous",
             debug=setting.debug,
         )
+        handlers = [
+            (r"/", HomeHandler),
+            (r"/compose", ComposeHandler),
+            (r"/auth/login", AuthLoginHandler),
+            (r"/auth/logout", AuthLogoutHandler),
+            # in production, serve static files from Nginx
+            (r"/(favicon\.ico)", tornado.web.StaticFileHandler,
+             dict(path=settings['static_path'])),
+            (r"/(robots\.txt)", tornado.web.StaticFileHandler,
+             dict(path=settings['static_path'])),
+            (r".*", NotFoundHandler),
+        ]
         tornado.web.Application.__init__(self, handlers, **settings)
 
         # Have one global connection to the blog DB across all handlers

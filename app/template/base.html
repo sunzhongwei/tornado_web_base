@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
+    <link href="{{ static_url('favicon.ico') }}" rel="shortcut icon">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
@@ -10,10 +11,10 @@
     <title>{% block title %}Starter Template for Bootstrap{% end %}</title>
 
     <!-- Bootstrap core CSS -->
-    <link rel="stylesheet" type="text/css" media="screen" href="{{ static_url('app/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" type="text/css" media="screen" href="{{ static_url('css/bootstrap.min.css') }}">
 
     <!-- Custom styles for this template -->
-    <link rel="stylesheet" type="text/css" media="screen" href="{{ static_url('app/css/style.css') }}">
+    <link rel="stylesheet" type="text/css" media="screen" href="{{ static_url('css/style.css') }}">
 
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
@@ -56,6 +57,6 @@
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
-    <script type="text/javascript" src="{{ static_url('app/js/bootstrap.min.js') }}"></script>
+    <script type="text/javascript" src="{{ static_url('js/bootstrap.min.js') }}"></script>
   </body>
 </html>
