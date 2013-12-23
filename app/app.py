@@ -71,6 +71,11 @@ class Application(tornado.web.Application):
         #    user=options.mysql_user, password=options.mysql_password)
         self.db = None
 
+    def log_request(self, handler):
+        '''disable default log.
+        '''
+        pass
+
 
 class BaseHandler(tornado.web.RequestHandler):
     @property
