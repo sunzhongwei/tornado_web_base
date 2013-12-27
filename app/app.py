@@ -10,8 +10,8 @@
 # build-in, 3rd party and my modules
 import time
 import os.path
-import logging
 
+from tornado.log import access_log
 import tornado.ioloop
 import tornado.auth
 import tornado.web
@@ -26,7 +26,6 @@ define("port", default=8888, help="run on the given port", type=int)
 
 
 def set_options():
-    tornado.options.parse_command_line()    # get port number
     setting.process_port = options.port
     options.logging='debug'
     options.log_to_stderr=True
@@ -97,13 +96,13 @@ class BaseHandler(tornado.web.RequestHandler):
             user = "anonymous"
         else:
             user = self.current_user["email"]
-        logging.info("uri: %s, method: %s, user: %s, arguments: %s, ip: %s" % (
+        access_log.info("uri: %s, method: %s, user: %s, arguments: %s, ip: %s" % (
                 self.request.uri, self.request.method, user,
                 arguments, self.request.remote_ip))
 
     def on_finish(self):
         cost_time = time.time() - self._start_time
-        logging.info("cost time: %0.3f" % (cost_time, ))
+        access_log.info("cost time: %0.3f" % (cost_time, ))
 
     # TODO: custom error handler
     #def _handle_request_exception(self, e):
@@ -150,7 +149,7 @@ class AuthLogoutHandler(BaseHandler):
 
 if __name__ == "__main__":
     set_options()
-    logging.info("Server is starting on port %s" % options.port)
+    access_log.info("Server is starting on port %s" % options.port)
     app = Application()
     app.listen(options.port)
     tornado.ioloop.IOLoop.instance().start()
