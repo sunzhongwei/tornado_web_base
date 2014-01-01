@@ -26,6 +26,9 @@ define("port", default=8888, help="run on the given port", type=int)
 
 
 def set_options():
+    options.logging='none'                  # in case config logging twice
+    tornado.options.parse_command_line()    # get port
+
     setting.process_port = options.port
     options.logging='debug'
     options.log_to_stderr=True
