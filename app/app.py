@@ -154,6 +154,6 @@ if __name__ == "__main__":
     set_options()
     access_log.info("Server is starting on port %s" % options.port)
     app = Application()
-    app.listen(options.port)
+    app.listen(options.port, xheaders=True)
     tornado.ioloop.IOLoop.instance().start()
 
